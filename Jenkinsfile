@@ -20,8 +20,15 @@ pipeline {
             steps {
                 sshagent(['aws-server']) {
                     sh """
-                    scp -o StrictHostKeyChecking=no ansible/index-aws.html $AWS_SERVER:/var/www/html/index.html
-                    ssh -o StrictHostKeyChecking=no $AWS_SERVER 'sudo systemctl restart nginx'
+                    echo "📦 Copying file to AWS..."
+                    scp -o StrictHostKeyChecking=no ansible/index-aws.html $AWS_SERVER:/tmp/index.html
+                    
+                    echo "🚀 Deploying on AWS server..."
+                    ssh -o StrictHostKeyChecking=no $AWS_SERVER '
+                        sudo mv /tmp/index.html /var/www/html/index.html &&
+                        sudo chown www-data:www-data /var/www/html/index.html &&
+                        sudo systemctl restart nginx
+                    '
                     """
                 }
             }
@@ -31,8 +38,15 @@ pipeline {
             steps {
                 sshagent(['azure-server']) {
                     sh """
-                    scp -o StrictHostKeyChecking=no ansible/index-azure.html $AZURE_SERVER:/var/www/html/index.html
-                    ssh -o StrictHostKeyChecking=no $AZURE_SERVER 'sudo systemctl restart nginx'
+                    echo "📦 Copying file to Azure..."
+                    scp -o StrictHostKeyChecking=no ansible/index-azure.html $AZURE_SERVER:/tmp/index.html
+                    
+                    echo "🚀 Deploying on Azure server..."
+                    ssh -o StrictHostKeyChecking=no $AZURE_SERVER '
+                        sudo mv /tmp/index.html /var/www/html/index.html &&
+                        sudo chown www-data:www-data /var/www/html/index.html &&
+                        sudo systemctl restart nginx
+                    '
                     """
                 }
             }
@@ -44,7 +58,7 @@ pipeline {
             echo "🎉 Deployment Successful on AWS & Azure!"
         }
         failure {
-            echo "❌ Deployment Failed. Check console logs."
+            echo "❌ Deployment Failed. Check pipeline logs."
         }
     }
 }
