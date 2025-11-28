@@ -10,15 +10,17 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/netrikadongre-source/capstone-cicd.git'
+                sshagent(['github-key']) {
+                    git branch: 'main', url: 'git@github.com:netrikadongre-source/capstone-cicd.git'
+                }
             }
         }
 
         stage('Deploy to AWS') {
             steps {
-                sshagent(credentials: ['aws-server']) {
+                sshagent(['aws-server']) {
                     sh """
-                    scp -o StrictHostKeyChecking=no index-aws.html $AWS_SERVER:/var/www/html/index.html
+                    scp -o StrictHostKeyChecking=no ansible/index-aws.html $AWS_SERVER:/var/www/html/index.html
                     ssh -o StrictHostKeyChecking=no $AWS_SERVER 'sudo systemctl restart nginx'
                     """
                 }
@@ -27,9 +29,9 @@ pipeline {
 
         stage('Deploy to Azure') {
             steps {
-                sshagent(credentials: ['azure-server']) {
+                sshagent(['azure-server']) {
                     sh """
-                    scp -o StrictHostKeyChecking=no index-azure.html $AZURE_SERVER:/var/www/html/index.html
+                    scp -o StrictHostKeyChecking=no ansible/index-azure.html $AZURE_SERVER:/var/www/html/index.html
                     ssh -o StrictHostKeyChecking=no $AZURE_SERVER 'sudo systemctl restart nginx'
                     """
                 }
