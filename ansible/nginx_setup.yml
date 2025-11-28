@@ -1,0 +1,32 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: Update system packages
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Ensure Nginx is started and enabled
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Copy AWS index.html to AWS server
+      copy:
+        src: index-aws.html
+        dest: /var/www/html/index.html
+      when: "'aws' in group_names"
+
+    - name: Copy Azure index.html to Azure server
+      copy:
+        src: index-azure.html
+        dest: /var/www/html/index.html
+      when: "'azure' in group_names"
+
