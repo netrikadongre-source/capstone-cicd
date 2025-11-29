@@ -1,5 +1,4 @@
----
-- hosts: all
+- hosts: all_servers
   become: yes
   tasks:
 
@@ -22,11 +21,11 @@
       copy:
         src: index-aws.html
         dest: /var/www/html/index.html
-      when: "'aws' in group_names"
+      when: "'aws_app' in group_names"
 
     - name: Copy Azure index.html to Azure server
       copy:
         src: index-azure.html
         dest: /var/www/html/index.html
-      when: "'azure' in group_names"
+      when: "'azure_vm' in group_names"
 
